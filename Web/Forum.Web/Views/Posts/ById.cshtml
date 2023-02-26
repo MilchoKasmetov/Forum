@@ -2,7 +2,7 @@
 @model Forum.Web.ViewModels.Posts.PostViewModel
 @{
     this.ViewData["Title"] = Model.Title;
-    void DisplayComments(int? parentId)
+    async Task DisplayComments(int? parentId)
     {
         var comments = this.Model.Comments.Where(x => x.ParentId == parentId);
         if (!comments.Any())
@@ -29,6 +29,15 @@
                                         @if (this.User.Identity.IsAuthenticated)
                                         {
                                             <div class="px-4 pt-3"> <button type="button" class="btn btn-secondary" onclick="showAddCommentForm(@comment.Id)"><i class="fa fa-plus"></i>&nbsp; Answer</button> </div>
+
+                                            <form class="input-group-sm text-white" asp-route-id="@comment.Id" asp-controller="Comments" asp-action="Edit" method="get">
+                                <input type="submit" value="Update" class="fs-6 btn btn-success mb-3 p-2" />
+                            </form>
+
+
+                                            <form class="input-group-sm" asp-route-id="@comment.Id" asp-controller="Comments" asp-action="Delete" method="post" onclick="return confirm('Are you sure you want to delete this?')">
+                                <input type="submit" value="Delete" class="fs-6 btn btn btn-danger mb-3 p-2" />
+                            </form>
                                         }
                                     </div>
                                 </div>
@@ -38,7 +47,7 @@
                                     @Html.Raw(comment.SanitizedContent)
                                 </article>
                                 @{
-                                    DisplayComments(comment.Id);
+                                   await DisplayComments(comment.Id);
                                 }
                             </div>
                         </div>
@@ -49,12 +58,6 @@
     }
 }
 
-@if (this.TempData["InfoMessage"] != null)
-{
-    <div class="alert alert-success">
-        @this.TempData["InfoMessage"]
-    </div>
-}
 
 <h1>@Model.Title</h1>
 <div class="container-fluid mt-100">
@@ -85,18 +88,19 @@
                             </div>
                         </div>
 
-                      
-                                <form class="input-group-sm text-white" asp-route-id="@Model.Id" asp-controller="Posts" asp-action="Edit" method="get">
-                                    <input type="submit" value="Update" class="fs-6 btn btn-success mb-3 p-2" />
-                                </form>
+                        @if (this.User.Identity.IsAuthenticated)
+                        {
+                            <form class="input-group-sm text-white" asp-route-id="@Model.Id" asp-controller="Posts" asp-action="Edit" method="get">
+                                <input type="submit" value="Update" class="fs-6 btn btn-success mb-3 p-2" />
+                            </form>
 
 
-                        <form class="input-group-sm"  asp-route-id="@Model.Id" asp-controller="Posts" asp-action="Delete" method="post" onclick="return confirm('Are you sure you want to delete this?')">
-                            <input type="submit" value="Delete" class="fs-6 btn btn btn-danger mb-3 p-2" />
-                        </form>
+                            <form class="input-group-sm" asp-route-id="@Model.Id" asp-controller="Posts" asp-action="Delete" method="post" onclick="return confirm('Are you sure you want to delete this?')">
+                                <input type="submit" value="Delete" class="fs-6 btn btn btn-danger mb-3 p-2" />
+                            </form>
 
-                      
 
+                        }
                     </div>
                 </div>
                 <div class="card-body">
@@ -108,9 +112,10 @@
                     {
                         <div class="px-4 pt-3"> <button type="button" class="btn btn-primary float-right" onclick="showAddCommentForm(0)"><i class="fa fa-plus"></i>&nbsp; Comment</button> </div>
                         <div class="clearfix"></div>
+
                     }
                     @{
-                        DisplayComments(null);
+                        await DisplayComments(null);
                     }
                 </div>
             </div>
@@ -135,6 +140,7 @@
         </div>
         <div>
             <input type="submit" class="btn btn-primary" value="Add comment" />
+
         </div>
     </form>
 </div>

@@ -5,6 +5,7 @@
     using Forum.Data.Models;
     using Forum.Services.Data;
     using Forum.Web.ViewModels.Comments;
+    using Forum.Web.ViewModels.Posts;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -42,6 +43,35 @@
             var userId = this.userManager.GetUserId(this.User);
             await this.commentsService.Create(input.PostId, userId, input.Content, parentId);
             return this.RedirectToAction("ById", "Posts", new { id = input.PostId });
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var model = this.commentsService.GetById<EditCommentsInputModel>(id);
+            return this.View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, EditCommentsInputModel input)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                return this.View(input);
+            }
+
+            await this.commentsService.UpdateAsync(id, input);
+            return this.RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
+        {
+
+            await this.commentsService.Delete(id);
+
+            return this.Redirect("/");
         }
     }
 }
