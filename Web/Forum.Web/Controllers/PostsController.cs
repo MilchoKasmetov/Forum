@@ -15,7 +15,7 @@
         private readonly IPostsService postsService;
         private readonly ICategoriesService categoriesService;
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly IMapper mapper;
+      
 
         public PostsController(
             IPostsService postsService,
@@ -60,8 +60,57 @@
             }
 
             var postId = await this.postsService.CreateAsync(input.Title, input.Content, input.CategoryId, user.Id);
-            this.TempData["InfoMessage"] = "Forum post created!";
+            
             return this.RedirectToAction(nameof(this.ById), new { id = postId });
+        }
+
+
+        public async Task<IActionResult> Edit(int id)
+        {
+
+            var user = await this.userManager.GetUserAsync(this.User);
+            var currentPost = this.postsService.GetById<PostViewModel>(id);
+
+            if(user.Email != currentPost.UserUserName)
+            {
+                return this.RedirectToAction("Index", "Home");
+            }
+            var model = this.postsService.GetById<EditPostsInputModel>(id);
+            var categories = this.categoriesService.GetAll<CategoryDropDownViewModel>();
+            model.Categories = categories;
+
+            return this.View(model);
+
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, EditPostsInputModel input)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                return this.View(input);
+            }
+
+            await this.postsService.UpdateAsync(id, input);
+            return this.RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var user = await this.userManager.GetUserAsync(this.User);
+            var currentPost = this.postsService.GetById<PostViewModel>(id);
+
+            if (user.Email != currentPost.UserUserName)
+            {
+                return this.RedirectToAction("Index", "Home");
+            }
+
+            await this.postsService.Delete(id);
+
+            return this.Redirect("/");
         }
     }
 }
