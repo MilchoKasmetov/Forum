@@ -18,7 +18,7 @@ namespace Forum.Data.Seeding
 
             var categories = new List<(string Name, string ImageUrl)>
             {
-                ("Cars", "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.auto.bg%2Fobiava%2F13606380%2Faudi-a7-rs7&psig=AOvVaw3sIw9-azhQwIomNdxcA2LG&ust=1677497879515000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCMCh5tqMs_0CFQAAAAAdAAAAABAE"),
+                ("Cars", "https://g1-bg.cars.bg/2020-07-18_2/5f12c42792b2e02f6d481cd3o.jpg"),
                 ("Sport", "https://nationaltoday.com/wp-content/uploads/2022/10/456840956-min-1.jpg"),
                 ("Music", "https://phantom-marca.unidadeditorial.es/51cffcd3bdd40680933dbc47aa45227b/resize/1320/f/jpg/assets/multimedia/imagenes/2022/12/07/16703744281238.jpg"),
             };

@@ -1,5 +1,6 @@
 ﻿namespace Forum.Web
 {
+    using System;
     using System.Reflection;
 
     using Forum.Data;
@@ -40,6 +41,13 @@
             services.AddDefaultIdentity<ApplicationUser>(IdentityOptionsProvider.GetIdentityOptions)
                 .AddRoles<ApplicationRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromDays(2);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
             services.Configure<CookiePolicyOptions>(
                 options =>
                 {
@@ -52,6 +60,12 @@
                 {
                     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
                 }).AddRazorRuntimeCompilation();
+
+            services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-CSRF-TOKEN";
+            });
+
             services.AddRazorPages();
             services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -65,6 +79,17 @@
             // Application services
             services.AddTransient<IEmailSender, NullMessageSender>();
             services.AddTransient<ISettingsService, SettingsService>();
+            services.AddTransient<ICategoriesService, CategoriesService>();
+            services.AddTransient<IPostsService, PostsService>();
+            services.AddTransient<IVotesService, VotesService>();
+            services.AddTransient<ICommentsService, CommentsService>();
+
+            // Facebook authentication
+            services.AddAuthentication().AddFacebook(facebookOptions =>
+            {
+                facebookOptions.AppId = configuration["Authentication:Facebook:AppId"];
+                facebookOptions.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+            });
         }
 
         private static void Configure(WebApplication app)
@@ -100,6 +125,7 @@
             app.UseAuthorization();
 
             app.MapControllerRoute("areaRoute", "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+            app.MapControllerRoute("forumCategory","f/{name:minlength(3)}", new { controller = "Categories", action = "ByName" });
             app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
         }
